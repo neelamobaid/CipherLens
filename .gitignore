@@ -1,0 +1,28 @@
+# Environment
+.env
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Temporary files
+test_shap.png
+test_shap-checkpoint.png
+test_extractor.py
+create_icons.py
+
+
+
+# OS files
+.DS_Store
+Thumbs.db
+
+image folder/
+phishing_detection_diagram.png

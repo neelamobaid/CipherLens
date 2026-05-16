@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CipherLens</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      width: 360px;
+      min-height: 500px;
+      background: #0a0e1a;
+      color: #e0e0e0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0d1b2a, #1a2d4a);
+      padding: 16px;
+      border-bottom: 1px solid #9b59b6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      color: #9b59b6;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .header span {
+      font-size: 10px;
+      color: #888;
+      display: block;
+      letter-spacing: 1px;
+    }
+
+    .shield { font-size: 28px; }
+
+    .url-bar {
+      background: #0d1b2a;
+      padding: 10px 16px;
+      border-bottom: 1px solid #1a2d4a;
+      font-size: 10px;
+      color: #888;
+      word-break: break-all;
+    }
+
+    .url-bar span {
+      color: #8e44ad;
+    }
+
+    .scan-btn {
+      width: calc(100% - 32px);
+      margin: 16px;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid #9b59b6;
+      color: #9b59b6;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .scan-btn:hover {
+      background: #9b59b6;
+      color: #0a0e1a;
+    }
+
+    .scan-btn:disabled {
+      border-color: #333;
+      color: #333;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #9b59b6;
+      font-size: 12px;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    .result { display: none; padding: 0 16px 16px; }
+
+    .verdict {
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+      border: 1px solid;
+      letter-spacing: 2px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .verdict.phishing {
+      background: rgba(255, 50, 50, 0.1);
+      border-color: #ff3232;
+      color: #ff3232;
+    }
+
+    .verdict.legitimate {
+      background: rgba(0, 255, 136, 0.1);
+      border-color: #9b59b6;
+      color: #9b59b6;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat-box {
+      background: #0d1b2a;
+      border: 1px solid #1a2d4a;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-box .label {
+      font-size: 9px;
+      color: #888;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat-box .value {
+      font-size: 16px;
+      color: #8e44ad;
+      font-weight: bold;
+    }
+
+    .stat-box .value.danger { color: #ff3232; }
+    .stat-box .value.safe { color: #9b59b6; }
+
+    .section-title {
+      font-size: 10px;
+      color: #888;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 12px 0 8px;
+      border-bottom: 1px solid #1a2d4a;
+      padding-bottom: 4px;
+    }
+
+    .vt-bar {
+      background: #0d1b2a;
+      border: 1px solid #1a2d4a;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+
+    .vt-label {
+      font-size: 10px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .vt-track {
+      background: #1a2d4a;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .vt-fill {
+      height: 100%;
+      background: #9b59b6;
+      transition: width 0.5s;
+    }
+
+    .vt-fill.danger { background: #ff3232; }
+
+    .vt-numbers {
+      font-size: 10px;
+      color: #888;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .error {
+      padding: 16px;
+      color: #FF3B5C;
+      font-size: 11px;
+      text-align: center;
+      display: none;
+    }
+
+    .footer {
+      padding: 8px 16px;
+      border-top: 1px solid #1a2d4a;
+      font-size: 9px;
+      color: #444;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    
+    <div>
+      <h1>CipherLens</h1>
+      <span>THREAT INTELLIGENCE SYSTEM</span>
+    </div>
+  </div>
+
+  <div class="url-bar">
+    SCANNING: <span id="currentUrl">—</span>
+  </div>
+
+  <button class="scan-btn" id="scanBtn">[ ANALYZE URL ]</button>
+
+  <div class="loading" id="loading">
+    ⟳ RUNNING THREAT ANALYSIS...
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="result" id="result">
+    <div class="verdict" id="verdictBox"></div>
+
+    <div class="stats">
+      <div class="stat-box">
+        <div class="label">ML Confidence</div>
+        <div class="value" id="mlConfidence">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="label">ML Verdict</div>
+        <div class="value" id="mlVerdict">—</div>
+      </div>
+    </div>
+
+    <div class="section-title">VirusTotal Engines</div>
+    <div class="vt-bar">
+      <div class="vt-label">Engine Detection Rate</div>
+      <div class="vt-track">
+        <div class="vt-fill" id="vtFill" style="width: 0%"></div>
+      </div>
+      <div class="vt-numbers" id="vtNumbers">—</div>
+    </div>
+
+  </div>
+
+  <div class="footer">CipherLens v1.0 | ML + THREAT INTELLIGENCE</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
